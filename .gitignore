@@ -1,0 +1,45 @@
+# Build artifacts
+*.o
+*.obj
+*.ko
+*.so
+*.a
+*.out
+
+# eBPF specific
+*.bpf.o
+*.skel.h
+
+# Generated kernel header
+vmlinux.h
+
+# BTF / debug
+*.btf
+*.dwarf
+
+# Temp / logs
+*.log
+*.tmp
+
+# Build dirs
+build/
+dist/
+out/
+
+# Make
+Makefile.bak
+
+# LSP / tooling
+compile_commands.json
+.cache/
+.clangd/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 🐧 OS junk
+.DS_Store
+Thumbs.db
