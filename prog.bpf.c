@@ -100,4 +100,61 @@ int prog_a_capture(struct trace_event_raw_sys_enter *ctx) {
   return 0;
 }
 
+/**
+ * ============================================
+ */
+
+/**
+ * Prog B : enrich and emit
+ * ============================================
+ */
+
+SEC("tp/syscalls/sys_enter_openat")
+int prog_b_emit(struct trace_event_raw_sys_enter *ctx) {
+
+  __u32 key = 0;
+
+  /**
+   * retrieve what prog a wrote into scratch
+   * same per-CPU slot ... smae CPU (BPF is not preemptible)
+   */
+
+  struct event *scratch_e = bpf_map_lookup_elem(&scratch, &key);
+
+  if (!scratch_e)
+    return 0;
+
+  /**
+   * atomically reserves size in the ring buffer
+   * return pointer to the memo or NULL
+   * reserved but not visible to userspace / submit or discard it
+   * 0 is a flag means default
+   */
+  struct event *e = bpf_ringbuf_reserve(&events, sizeof(struct event), 0);
+  if (!e) {
+    /** ring is full... dorp this event */
+    return 0;
+  }
+
+  /** copy scratch data into the reserved memo */
+  __builtin_memcpy(e, scratch_e, sizeof(struct event));
+
+  /** fill buf with the current task comm string (process name)
+   * e.g. "bash\0", "nginx\0" ...
+   * trucate the size if longer
+   */
+
+  bpf_get_current_comm(e->comm, sizeof(e->comm));
+
+  /**
+   * make the reserved slot visible to userspace
+   * userspace epoll wakes up and handle_event() is called
+   * flags : 0 = notify userspace immediately
+   */
+
+  bpf_ringbuf_submit(e, 0);
+
+  return 0;
+}
+
 char LICENSE[] SEC("license") = "GPL";
