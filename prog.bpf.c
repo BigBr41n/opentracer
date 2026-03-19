@@ -47,8 +47,8 @@ struct {
 struct {
   __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
   __uint(max_entries, 1);
-  __uint(key_size, sizeof(__u32));
-  __uint(value_size, sizeof(struct event));
+  __type(key, __u32);
+  __type(value, struct event);
 } scratch SEC(".maps");
 
 /**
