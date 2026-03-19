@@ -33,3 +33,4 @@ struct event {
   char filename[FILENAME_LEN]; /* patch passed to openat()*/
   int flags;                   /* openat flags: O_RDONLY, O_WRONLY...*/
 };
+#define TAIL_ENRICH_AND_EMIT 0
